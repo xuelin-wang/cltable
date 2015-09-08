@@ -13,6 +13,13 @@
   nil
 )
 
+(defn table [{:keys [on-mouse-up class table-header table-data-body]}]
+  [:div {:class class :on-mouse-up on-mouse-up}
+    table-header
+    table-data-body
+  ]
+)
+
 (defn table-header [{:keys [action]}]
   nil
 )
@@ -66,48 +73,48 @@
           ]
         ]
 
-        [:table {
+        [table {
             :on-mouse-up #(on-mouse-up)
             :class table-class-name
-          }
-          [table-header
-            {:action (:action @state)
-              :preheaders preheaders
-              :header header
-              :header-cell-renderer header-cell-renderer
-              :show-hide-columns show-hide-columns
-              :show-header-menu show-header-menu
-              :filter-criteria filter-criteria
-              :select-cells select-cells
-              :header-menu-col-index header-menu-col-index
-              :show-filter-list show-filter-list
-              :is-filter (:is-filter @state)
-              :columns-visibility columns-visibility
-              :selected-indices (:selected-indices @state)
-              :index 0
-              :ref "header"
-            }
-          ]
+            :table-header  [table-header
+                {:action (:action @state)
+                  :preheaders preheaders
+                  :header header
+                  :header-cell-renderer header-cell-renderer
+                  :show-hide-columns show-hide-columns
+                  :show-header-menu show-header-menu
+                  :filter-criteria filter-criteria
+                  :select-cells select-cells
+                  :header-menu-col-index header-menu-col-index
+                  :show-filter-list show-filter-list
+                  :is-filter (:is-filter @state)
+                  :columns-visibility columns-visibility
+                  :selected-indices (:selected-indices @state)
+                  :index 0
+                  :ref "header"
+                }
+              ]
 
-          [table-data-body
-             {:action (:action @state)
-              :class tbodyClassName
-              :data table-data
-              :is-filter (:is-filter @state)
-              :columns-visibility columns-visibility
-             :filter-criteria filter-criteria
-             :selected-indices (:selected-indices @state)
-             :set-cell-data-change set-cell-data
-             :get-cell-spec get-cell-spec
-             :get-data-cell-renderer get-data-cell-renderer
-             :sort-col-index (:sort-col-index @state)
-             :sort-direction (:sort-direction @state)
-             :check-criteria check-criteria
-             :select-cells select-cells
-             :index 1
-             :ref "body"
-             }
-          ]
+            :table-data-body [table-data-body
+                 {:action (:action @state)
+                  :class tbodyClassName
+                  :data table-data
+                  :is-filter (:is-filter @state)
+                  :columns-visibility columns-visibility
+                 :filter-criteria filter-criteria
+                 :selected-indices (:selected-indices @state)
+                 :set-cell-data-change set-cell-data
+                 :get-cell-spec get-cell-spec
+                 :get-data-cell-renderer get-data-cell-renderer
+                 :sort-col-index (:sort-col-index @state)
+                 :sort-direction (:sort-direction @state)
+                 :check-criteria check-criteria
+                 :select-cells select-cells
+                 :index 1
+                 :ref "body"
+                 }
+              ]
+          }
         ]
 
         [table-overlay
@@ -125,9 +132,10 @@
 
 (defn exampleTable []
   (let []
+    [
+    ]
     [cltable
-         {
-         }
+       {}
     ]
   )
 )
