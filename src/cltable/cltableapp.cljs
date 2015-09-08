@@ -1,5 +1,7 @@
 (ns cltable.cltableapp
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r])
+  (:require [cltable.util :as u])
+)
 
 (defn reset-overlay []
   nil
@@ -13,6 +15,7 @@
   nil
 )
 
+<<<<<<< HEAD
 (defn table [{:keys [on-mouse-up class table-header table-data-body]}]
   [:div {:class class :on-mouse-up on-mouse-up}
     table-header
@@ -24,6 +27,8 @@
   nil
 )
 
+=======
+>>>>>>> 56858f57d2c150f13b066c9f9c7f2b6aef8fb6b7
 (defn show-hide-columns [from-col-index to-col-index show-or-hide]
   nil
 )
@@ -38,6 +43,29 @@
 
 (defn table-overlay [{:keys [data]}]
   nil
+)
+
+(defn table-header [{:keys [header visible-columns show-hide-columns]}]
+  (let
+    [
+      state
+        (r/atom {:active-header-index -1})
+      show-columns
+        (fn [colIndex left]
+          (let
+            [
+              index (if left (dec colIndex) (inc colIndex))
+              col-indices (u/int-range index #(not (visible-columns %)))
+            ]
+            (show-hide-columns col-indices true)
+          )
+        )
+      default-cell-renderer
+        (fn [col colindex hidden]
+        )
+    ]
+    nil
+  )
 )
 
 (defn cltable

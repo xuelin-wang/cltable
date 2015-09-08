@@ -13,10 +13,6 @@
   nil
 )
 
-(defn table-header [{:keys [action]}]
-  nil
-)
-
 (defn show-hide-columns [from-col-index to-col-index show-or-hide]
   nil
 )
@@ -31,6 +27,29 @@
 
 (defn table-overlay [{:keys [data]}]
   nil
+)
+
+(defn table-header [{:keys [header columns-visibility]}]
+  (let
+    [
+      state
+        (r/atom {:active-header-index -1})
+      show-columns
+        (fn [left]
+          (if left
+            (let
+              [
+
+              ]
+            )
+          )
+        )
+      default-cell-renderer
+        (fn [col colindex hidden]
+        )
+    ]
+    nil
+  )
 )
 
 (defn cltable
