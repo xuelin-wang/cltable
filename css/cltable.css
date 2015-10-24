@@ -1,4 +1,69 @@
+.cltable {
+}
 
+.tableLayout {
+}
+
+.rowLayout {
+}
+
+.cellgroup_fixed {
+}
+
+.cellgroup_scrollable {
+}
+
+.row_header {
+  font-weight: bold;
+  background-color: #f6f7f8;
+  background-image: linear-gradient(#fff, #efefef);
+}
+
+.row_dark {
+  background-color: #f6f7f8;
+}
+
+.row_light {
+  background-color: #fff;
+}
+
+.exampleTable {
+  font-family: Helvetica, Arial, 'lucida grande', tahoma, verdana, arial, sans-serif;
+  font-size: 12px;
+}
+
+.cellLayout {
+  border-left-style: solid;
+  border-left-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-color: #d3d3d3;
+}
+
+.cellLayout_top {
+  border-top-style: solid;
+  border-top-width: 1px;
+}
+
+.cellLayout_right {
+  border-right-style: solid;
+  border-right-width: 1px;
+}
+
+.cltable_row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: flex-start;
+}
+
+.cltable_cell {
+  order: 1;
+  flex-grow: 1;
+  align-self: center;
+}
 
 .app {
   font-family: 'Muli', 'Helvetica Neue', helvetica, arial;

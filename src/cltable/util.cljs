@@ -13,3 +13,8 @@
     )
   )
 )
+
+(defn key-mirror [keys]
+      (into {} (map vector keys keys)))
+
+(defn elem [id] (js/document.getElementById id))

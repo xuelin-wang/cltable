@@ -1,6 +1,7 @@
 (ns figwheel.client
   (:require
    [goog.Uri :as guri]
+   [goog.userAgent.product :as product]
    [cljs.core.async :refer [put! chan <! map< close! timeout alts!] :as async]
    [figwheel.client.socket :as socket]
    [figwheel.client.utils :as utils]   
@@ -20,6 +21,20 @@
                  :callback-name "figwheel-repl-print"
                  :content args})
   args)
+
+(def autoload?
+  (if (utils/html-env?)
+    (fn []
+      (condp = (or (.getItem js/localStorage "figwheel_autoload") "true")
+        "true" true
+        "false" false))
+    (fn [] true)))
+
+(defn ^:export toggle-autoload []
+  (when (utils/html-env?)
+    (.setItem js/localStorage "figwheel_autoload" (not (autoload?)))
+    (utils/log :info
+               (str "Figwheel autoloading " (if (autoload?) "ON" "OFF")))))
 
 (defn console-print [args]
   (.apply (.-log js/console) js/console (into-array args))
@@ -85,12 +100,16 @@
                      msg-names (map :msg-name msg-hist)
                      msg (first msg-hist)]
                  #_(.log js/console (prn-str msg))
-                 (cond
-                  (reload-file-state? msg-names opts)
-                  (alts! [(reloading/reload-js-files opts msg) (timeout 1000)])
-                  
-                  (block-reload-file-state? msg-names opts)
-                  (.warn js/console "Figwheel: Not loading code with warnings - " (-> msg :files first :file)))
+                 (if (autoload?)
+                     (cond
+                       (reload-file-state? msg-names opts)
+                       (alts! [(reloading/reload-js-files opts msg) (timeout 1000)])
+                       
+                       (block-reload-file-state? msg-names opts)
+                       (utils/log :warn (str "Figwheel: Not loading code with warnings - " (-> msg :files first :file))))
+                     (do
+                       (utils/log :warn "Figwheel: code autoloading is OFF")
+                       (utils/log :info (str "Not loading: " (map :file (:files msg))))))
                  (recur))))
     (fn [msg-hist] (put! ch msg-hist) msg-hist)))
 
@@ -107,6 +126,14 @@
   (take-while #(not (re-matches #".*eval_javascript_STAR__STAR_.*" %))
               (string/split-lines stack-str)))
 
+(defn get-ua-product []
+  (cond
+    (utils/node-env?) :chrome
+    product/SAFARI    :safari
+    product/CHROME    :chrome
+    product/FIREFOX   :firefox
+    product/IE        :ie))
+
 (let [base-path (utils/base-url-path)]
   (defn eval-javascript** [code opts result-handler]
     (try
@@ -117,18 +144,21 @@
                 *print-newline* false]
         (result-handler
          {:status :success,
+          :ua-product (get-ua-product)
           :value (str (utils/eval-helper code opts))}))
       (catch js/Error e
         (result-handler
          {:status :exception
           :value (pr-str e)
+          :ua-product (get-ua-product)          
           :stacktrace (string/join "\n" (truncate-stack-trace (.-stack e)))
           :base-path base-path }))
-    (catch :default e
-      (result-handler
-       {:status :exception
-        :value (pr-str e)
-        :stacktrace "No stacktrace available."})))))
+      (catch :default e
+        (result-handler
+         {:status :exception
+          :ua-product (get-ua-product)          
+          :value (pr-str e)
+          :stacktrace "No stacktrace available."})))))
 
 (defn ensure-cljs-user
   "The REPL can disconnect and reconnect lets ensure cljs.user exists at least."
@@ -142,10 +172,10 @@
     (when (= :repl-eval msg-name)
       (ensure-cljs-user)
       (eval-javascript** (:code msg) opts
-       (fn [res]
-         (socket/send! {:figwheel-event "callback"
-                        :callback-name (:callback-name  msg)
-                        :content res}))))))
+                         (fn [res]
+                           (socket/send! {:figwheel-event "callback"
+                                          :callback-name (:callback-name  msg)
+                                          :content res}))))))
 
 (defn css-reloader-plugin [opts]
   (fn [[{:keys [msg-name] :as msg} & _]]
@@ -167,10 +197,11 @@
     (go
      (cond
       (reload-file-state? msg-names opts)
-      (if (:autoload opts)
+      (if (and (autoload?)
+               (:autoload opts))
         (<! (heads-up/flash-loaded))
         (<! (heads-up/clear)))
-
+     
       (compile-refail-state? msg-names)
       (do
         (<! (heads-up/clear))
@@ -257,20 +288,18 @@
    :on-jsload default-on-jsload
    :before-jsload default-before-load
 
-   :url-rewriter false
-
    :on-cssload default-on-cssload
    
    :on-compile-fail default-on-compile-fail
    :on-compile-warning default-on-compile-warning
 
+   :reload-dependents true
+   
    :autoload true
    
    :debug false
    
    :heads-up-display true
-
-   :load-unchanged-files true
 
    :eval-fn false
    })
@@ -332,3 +361,4 @@
 ;; legacy interface
 (def watch-and-reload-with-opts start)
 (defn watch-and-reload [& {:keys [] :as opts}] (start opts))
+
